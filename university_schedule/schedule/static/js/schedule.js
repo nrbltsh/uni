@@ -187,84 +187,100 @@ export function setupSchedule(userRole, token, utils) {
     });
 
     $('#group').change(function() {
-        const groupId = $(this).val();
-        if (groupId) {
-            const facultyId = $(`#group option[value="${groupId}"]`).data('faculty-id');
+    const groupId = $(this).val();
+    if (groupId) {
+        const facultyId = $(`#group option[value="${groupId}"]`).data('faculty-id');
+        // Проверяем, что facultyId определён и не равен undefined
+        if (facultyId && facultyId !== undefined && facultyId !== 'undefined') {
             loadSubjects(facultyId);
             loadTeachers(facultyId);
             loadClassrooms(facultyId);
         } else {
+            console.warn('facultyId не определён, загружаем все данные');
             loadSubjects();
             loadTeachers();
             loadClassrooms();
         }
-    });
+    } else {
+        loadSubjects();
+        loadTeachers();
+        loadClassrooms();
+    }
+});
 
     $('#edit-group').change(function() {
-        const groupId = $(this).val();
-        if (groupId) {
-            const facultyId = $(`#edit-group option[value="${groupId}"]`).data('faculty-id');
+    const groupId = $(this).val();
+    if (groupId) {
+        const facultyId = $(`#edit-group option[value="${groupId}"]`).data('faculty-id');
+        // Проверяем, что facultyId определён и не равен undefined
+        if (facultyId && facultyId !== undefined && facultyId !== 'undefined') {
             loadSubjects(facultyId);
             loadTeachers(facultyId);
             loadClassrooms(facultyId);
         } else {
+            console.warn('facultyId не определён, загружаем все данные');
             loadSubjects();
             loadTeachers();
             loadClassrooms();
         }
-    });
+    } else {
+        loadSubjects();
+        loadTeachers();
+        loadClassrooms();
+    }
+});
 
-    // Добавление занятия с проверкой конфликтов
-    $('#add-schedule-form').submit(async function(event) {
-        event.preventDefault();
+    // schedule/static/js/schedule.js
+$('#add-schedule-form').submit(async function(event) {
+    event.preventDefault();
 
-        const startTime = $('#start_time').val();
-        const endTime = $('#end_time').val();
-        const groupId = $('#group').val();
-        const subjectId = $('#subject').val();
-        const teacherId = $('#teacher').val();
-        const classroomId = $('#classroom').val();
-        const day = $('#day_of_week').val();
+    const startTime = $('#start_time').val();
+    const endTime = $('#end_time').val();
+    const groupId = $('#group').val();
+    const subjectId = $('#subject').val();
+    const teacherId = $('#teacher').val();
+    const classroomId = $('#classroom').val();
+    const day = $('#day_of_week').val();
 
-        if (!groupId || !subjectId || !teacherId || !classroomId || !startTime || !endTime) {
-            alert('Пожалуйста, заполните все обязательные поля.');
-            return;
+    if (!groupId || !subjectId || !teacherId || !classroomId || !startTime || !endTime) {
+        alert('Пожалуйста, заполните все обязательные поля.');
+        return;
+    }
+
+    // Проверяем конфликты
+    const conflictResult = await checkConflicts(day, `${startTime}:00`, `${endTime}:00`, parseInt(teacherId), parseInt(classroomId));
+    if (conflictResult.hasConflict) {
+        alert('Обнаружен конфликт:\n' + conflictResult.messages.join('\n'));
+        return;
+    }
+
+    const data = {
+        day_of_week: day,
+        group: groupId,       // Изменено с group_id на group
+        subject: subjectId,   // Изменено с subject_id на subject
+        teacher: teacherId,   // Изменено с teacher_id на teacher
+        classroom: classroomId, // Изменено с classroom_id на classroom
+        start_time: `${startTime}:00`,
+        end_time: `${endTime}:00`
+    };
+
+    console.log('Добавление занятия:', data);
+    $.ajax({
+        url: '/api/schedule/',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function() {
+            alert('Занятие успешно добавлено!');
+            loadSchedule($('#filter-group').val());
+            $('#add-schedule-form')[0].reset();
+            $('#add-schedule-container').hide();
+        },
+        error: function(xhr) {
+            alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
         }
-
-        // Проверяем конфликты
-        const conflictResult = await checkConflicts(day, `${startTime}:00`, `${endTime}:00`, parseInt(teacherId), parseInt(classroomId));
-        if (conflictResult.hasConflict) {
-            alert('Обнаружен конфликт:\n' + conflictResult.messages.join('\n'));
-            return;
-        }
-
-        const data = {
-            day_of_week: day,
-            group_id: groupId,
-            subject_id: subjectId,
-            teacher_id: teacherId,
-            classroom_id: classroomId,
-            start_time: `${startTime}:00`,
-            end_time: `${endTime}:00`
-        };
-
-        console.log('Добавление занятия:', data);
-        $.ajax({
-            url: '/api/schedule/',
-            method: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function() {
-                alert('Занятие успешно добавлено!');
-                loadSchedule($('#filter-group').val());
-                $('#add-schedule-form')[0].reset();
-                $('#add-schedule-container').hide();
-            },
-            error: function(xhr) {
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
-            }
-        });
     });
+});
 
     // Редактирование занятия с проверкой конфликтов
     $(document).on('click', '.edit-schedule', function() {
@@ -289,54 +305,55 @@ export function setupSchedule(userRole, token, utils) {
         });
     });
 
-    $('#save-edit').click(async function() {
-        const startTime = $('#edit-start_time').val();
-        const endTime = $('#edit-end_time').val();
-        const groupId = $('#edit-group').val();
-        const subjectId = $('#edit-subject').val();
-        const teacherId = $('#edit-teacher').val();
-        const classroomId = $('#edit-classroom').val();
-        const day = $('#edit-day_of_week').val();
-        const id = $('#edit-id').val();
+    // schedule/static/js/schedule.js
+$('#save-edit').click(async function() {
+    const startTime = $('#edit-start_time').val();
+    const endTime = $('#edit-end_time').val();
+    const groupId = $('#edit-group').val();
+    const subjectId = $('#edit-subject').val();
+    const teacherId = $('#edit-teacher').val();
+    const classroomId = $('#edit-classroom').val();
+    const day = $('#edit-day_of_week').val();
+    const id = $('#edit-id').val();
 
-        if (!groupId || !subjectId || !teacherId || !classroomId || !startTime || !endTime) {
-            alert('Пожалуйста, заполните все обязательные поля.');
-            return;
+    if (!groupId || !subjectId || !teacherId || !classroomId || !startTime || !endTime) {
+        alert('Пожалуйста, заполните все обязательные поля.');
+        return;
+    }
+
+    // Проверяем конфликты
+    const conflictResult = await checkConflicts(day, `${startTime}:00`, `${endTime}:00`, parseInt(teacherId), parseInt(classroomId), parseInt(id));
+    if (conflictResult.hasConflict) {
+        alert('Обнаружен конфликт:\n' + conflictResult.messages.join('\n'));
+        return;
+    }
+
+    const data = {
+        day_of_week: day,
+        group: groupId,       // Изменено с group_id на group
+        subject: subjectId,   // Изменено с subject_id на subject
+        teacher: teacherId,   // Изменено с teacher_id на teacher
+        classroom: classroomId, // Изменено с classroom_id на classroom
+        start_time: `${startTime}:00`,
+        end_time: `${endTime}:00`
+    };
+
+    console.log('Обновление занятия:', data);
+    $.ajax({
+        url: `/api/schedule/${id}/`,
+        method: 'PUT',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function() {
+            alert('Занятие обновлено!');
+            loadSchedule($('#filter-group').val());
+            $('#edit-schedule-modal').modal('hide');
+        },
+        error: function(xhr) {
+            alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
         }
-
-        // Проверяем конфликты
-        const conflictResult = await checkConflicts(day, `${startTime}:00`, `${endTime}:00`, parseInt(teacherId), parseInt(classroomId), parseInt(id));
-        if (conflictResult.hasConflict) {
-            alert('Обнаружен конфликт:\n' + conflictResult.messages.join('\n'));
-            return;
-        }
-
-        const data = {
-            day_of_week: day,
-            group_id: groupId,
-            subject_id: subjectId,
-            teacher_id: teacherId,
-            classroom_id: classroomId,
-            start_time: `${startTime}:00`,
-            end_time: `${endTime}:00`
-        };
-
-        console.log('Обновление занятия:', data);
-        $.ajax({
-            url: `/api/schedule/${id}/`,
-            method: 'PUT',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function() {
-                alert('Занятие обновлено!');
-                loadSchedule($('#filter-group').val());
-                $('#edit-schedule-modal').modal('hide');
-            },
-            error: function(xhr) {
-                alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
-            }
-        });
     });
+});
 
     // Удаление занятия
     $(document).on('click', '.delete-schedule', function() {

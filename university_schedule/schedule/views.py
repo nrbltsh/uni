@@ -11,6 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +148,9 @@ class SubjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
-            return Subject.objects.filter(faculty_id=faculty_id)
+            if faculty_id == 'undefined' or not faculty_id.isdigit():
+                raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
+            return Subject.objects.filter(faculty_id=int(faculty_id))
         return Subject.objects.all()
 
 class TeacherViewSet(viewsets.ModelViewSet):
@@ -158,7 +161,9 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
-            return Teacher.objects.filter(faculty_id=faculty_id)
+            if faculty_id == 'undefined' or not faculty_id.isdigit():
+                raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
+            return Teacher.objects.filter(faculty_id=int(faculty_id))
         return Teacher.objects.all()
 
 class ClassroomViewSet(viewsets.ModelViewSet):
@@ -169,7 +174,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
-            return Classroom.objects.filter(faculty_id=faculty_id)
+            if faculty_id == 'undefined' or not faculty_id.isdigit():
+                raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
+            return Classroom.objects.filter(faculty_id=int(faculty_id))
         return Classroom.objects.all()
 
 @api_view(['GET'])
