@@ -1,0 +1,54 @@
+{% extends 'schedule/base.html' %}
+{% block title %}Расписание занятий КНУ{% endblock %}
+{% block content %}
+    <h1>Расписание занятий</h1>
+    <div class="auth-container">
+        <div class="row">
+            <!-- Форма входа -->
+            <div class="col-md-6 offset-md-3">
+                <div id="login-form" class="mb-3">
+                    <h2>Вход</h2>
+                    <form>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Имя пользователя</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                        <a href="{% url 'schedule:register' %}" class="btn btn-secondary ms-2">Регистрация</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="schedule-content" class="mb-3" style="display: none;">
+        <button id="logout-btn" class="btn btn-danger mb-3 me-2">Выйти</button>
+        <button id="show-add-form" class="btn btn-primary mb-3 me-2">Добавить занятие</button>
+        <button id="show-subjects" class="btn btn-primary mb-3 me-2">Предметы</button>
+        <button id="show-faculties" class="btn btn-primary mb-3 me-2">Факультет</button>
+        <button id="show-teachers" class="btn btn-primary mb-3 me-2">Преподаватели</button>
+        <button id="show-classrooms" class="btn btn-primary mb-3 me-2">Аудитория</button>
+        <button id="show-groups" class="btn btn-primary mb-3 me-2">Группы</button>
+        <div class="mb-3">
+            <label for="filter-faculty" class="form-label">Факультет</label>
+            <select id="filter-faculty" class="form-select"></select>
+        </div>
+        <div class="mb-3">
+            <label for="filter-group" class="form-label">Группа</label>
+            <select id="filter-group" class="form-select"></select>
+        </div>
+        {% include 'schedule/components/add_schedule.html' %}
+        {% include 'schedule/components/subjects.html' %}
+        {% include 'schedule/components/teachers.html' %}
+        {% include 'schedule/components/classrooms.html' %}
+        {% include 'schedule/components/faculties.html' %}
+        {% include 'schedule/components/groups.html' %}
+        <div id="schedule-table-container" style="display: none;">
+            {% include 'schedule/components/schedule_table.html' %}
+        </div>
+    </div>
+    {% include 'schedule/modals.html' %}
+{% endblock %}

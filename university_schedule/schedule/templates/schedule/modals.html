@@ -1,0 +1,83 @@
+<div class="modal fade" id="edit-schedule-modal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editScheduleModalLabel">Редактировать занятие</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-schedule-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="mb-3">
+                        <label for="edit-day_of_week" class="form-label">День недели</label>
+                        <select id="edit-day_of_week" class="form-select" required>
+                            <option value="mon">Понедельник</option>
+                            <option value="tue">Вторник</option>
+                            <option value="wed">Среда</option>
+                            <option value="thu">Четверг</option>
+                            <option value="fri">Пятница</option>
+                            <option value="sat">Суббота</option>
+                            <option value="sun">Воскресенье</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-group" class="form-label">Группа</label>
+                        <select id="edit-group" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-subject" class="form-label">Предмет</label>
+                        <select id="edit-subject" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-teacher" class="form-label">Преподаватель</label>
+                        <select id="edit-teacher" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-classroom" class="form-label">Аудитория</label>
+                        <select id="edit-classroom" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-start_time" class="form-label">Время начала</label>
+                        <input type="time" class="form-control" id="edit-start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-end_time" class="form-label">Время окончания</label>
+                        <input type="time" class="form-control" id="edit-end_time" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="save-edit">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit-group-modal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGroupModalLabel">Редактировать группу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-group-form">
+                    <input type="hidden" id="edit-group-id">
+                    <div class="mb-3">
+                        <label for="edit-group-name" class="form-label">Название группы</label>
+                        <input type="text" class="form-control" id="edit-group-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-group-faculty" class="form-label">Факультет</label>
+                        <select id="edit-group-faculty" class="form-select" required></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="save-edit-group">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
