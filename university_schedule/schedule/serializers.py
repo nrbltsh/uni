@@ -1,70 +1,81 @@
 from rest_framework import serializers
-from .models import Schedule, Group, Subject, Teacher, Classroom, Faculty, User
+from .models import Faculty, Group, Subject, Teacher, Classroom, Schedule, User
 
-# Сериализатор для факультетов
 class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
         fields = ['id', 'name']
 
-# Сериализатор для групп
 class GroupSerializer(serializers.ModelSerializer):
-    faculty = serializers.StringRelatedField()
-
+    faculty = serializers.PrimaryKeyRelatedField(queryset=Faculty.objects.all(), allow_null=False)
     class Meta:
         model = Group
         fields = ['id', 'name', 'faculty']
 
-# Сериализатор для предметов
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['faculty'] = {'id': instance.faculty.id, 'name': instance.faculty.name} if instance.faculty else None
+        return representation
+
 class SubjectSerializer(serializers.ModelSerializer):
-    faculty = serializers.StringRelatedField()
+    faculty = serializers.PrimaryKeyRelatedField(queryset=Faculty.objects.all(), allow_null=False)
 
     class Meta:
         model = Subject
         fields = ['id', 'name', 'faculty']
 
-# Сериализатор для преподавателей
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['faculty'] = {'id': instance.faculty.id,
+                                     'name': instance.faculty.name} if instance.faculty else None
+        return representation
+
 class TeacherSerializer(serializers.ModelSerializer):
-    faculty = serializers.StringRelatedField()
+    faculty = serializers.PrimaryKeyRelatedField(queryset=Faculty.objects.all(), allow_null=False)
 
     class Meta:
         model = Teacher
         fields = ['id', 'last_name', 'first_name', 'middle_name', 'faculty']
 
-# Сериализатор для аудиторий
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['faculty'] = {'id': instance.faculty.id,
+                                     'name': instance.faculty.name} if instance.faculty else None
+        return representation
+
+
 class ClassroomSerializer(serializers.ModelSerializer):
-    faculty = serializers.StringRelatedField()
+    faculty = serializers.PrimaryKeyRelatedField(queryset=Faculty.objects.all(), allow_null=False)
 
     class Meta:
         model = Classroom
         fields = ['id', 'name', 'faculty']
 
-# Сериализатор для расписания
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['faculty'] = {'id': instance.faculty.id,
+                                     'name': instance.faculty.name} if instance.faculty else None
+        return representation
+
 class ScheduleSerializer(serializers.ModelSerializer):
-    # Поля для создания/обновления (используем ID связанных объектов)
     group = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
     subject = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all())
     teacher = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all())
     classroom = serializers.PrimaryKeyRelatedField(queryset=Classroom.objects.all())
-
-    # Ограничение выбора дня недели (без воскресенья)
-    DAY_CHOICES = [
+    day_of_week = serializers.ChoiceField(choices=[
         ('mon', 'Понедельник'),
         ('tue', 'Вторник'),
         ('wed', 'Среда'),
         ('thu', 'Четверг'),
         ('fri', 'Пятница'),
         ('sat', 'Суббота'),
-    ]
-
-    day_of_week = serializers.ChoiceField(choices=DAY_CHOICES)
+    ])
 
     class Meta:
         model = Schedule
         fields = ['id', 'day_of_week', 'group', 'subject', 'teacher', 'classroom', 'start_time', 'end_time']
 
     def to_representation(self, instance):
-        # При сериализации возвращаем полные данные о связанных объектах
         representation = super().to_representation(instance)
         representation['group'] = {'id': instance.group.id, 'name': instance.group.name}
         representation['subject'] = {'id': instance.subject.id, 'name': instance.subject.name}
@@ -77,8 +88,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
         representation['classroom'] = {'id': instance.classroom.id, 'name': instance.classroom.name}
         return representation
 
-    def validate(self, data):
-        # Проверка, что время окончания позже времени начала
-        if data['start_time'] >= data['end_time']:
-            raise serializers.ValidationError("Время окончания должно быть позже времени начала.")
-        return data
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'role']

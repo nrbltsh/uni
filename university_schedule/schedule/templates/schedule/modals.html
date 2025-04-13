@@ -17,7 +17,6 @@
                             <option value="thu">Четверг</option>
                             <option value="fri">Пятница</option>
                             <option value="sat">Суббота</option>
-                            <option value="sun">Воскресенье</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -82,15 +81,77 @@
     </div>
 </div>
 
-<body>
-    <div id="logoutModal" class="modal">
+<div class="modal fade" id="edit-classroom-modal" tabindex="-1" aria-labelledby="editClassroomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <h3>Подтверждение выхода</h3>
-            <p>Вы уверены, что хотите выйти?</p>
-            <div class="modal-buttons">
-                <button id="confirmLogout" class="btn btn-primary">Выйти</button>
-                <button id="cancelLogout" class="btn btn-secondary">Отмена</button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="editClassroomModalLabel">Редактировать аудиторию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-classroom-form">
+                    <input type="hidden" id="edit-classroom-id">
+                    <div class="mb-3">
+                        <label for="edit-classroom-name" class="form-label">Название аудитории</label>
+                        <input type="text" class="form-control" id="edit-classroom-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-classroom-faculty" class="form-label">Факультет</label>
+                        <select id="edit-classroom-faculty" class="form-select" required></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="save-edit-classroom">Сохранить</button>
             </div>
         </div>
     </div>
-</body>
+</div>
+
+<div class="modal fade" id="edit-teacher-modal" tabindex="-1" aria-labelledby="editTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTeacherModalLabel">Редактировать преподавателя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-teacher-form">
+                    <input type="hidden" id="edit-teacher-id">
+                    <div class="mb-3">
+                        <label for="edit-teacher-last-name" class="form-label">Фамилия</label>
+                        <input type="text" class="form-control" id="edit-teacher-last-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-teacher-first-name" class="form-label">Имя</label>
+                        <input type="text" class="form-control" id="edit-teacher-first-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-teacher-middle-name" class="form-label">Отчество</label>
+                        <input type="text" class="form-control" id="edit-teacher-middle-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-teacher-faculty" class="form-label">Факультет</label>
+                        <select id="edit-teacher-faculty" class="form-select" required></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="save-edit-teacher">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="logoutModal" class="modal">
+    <div class="modal-content">
+        <h3>Подтверждение выхода</h3>
+        <p>Вы уверены, что хотите выйти?</p>
+        <div class="modal-buttons">
+            <button id="confirmLogout" class="btn btn-primary">Выйти</button>
+            <button id="cancelLogout" class="btn btn-secondary">Отмена</button>
+        </div>
+    </div>
+</div>
