@@ -79,13 +79,49 @@ export function handleAuth(token, userRole, setupSchedule, setupEntities, utils)
     });
 
     // Обработчик выхода
-    $('#logout-btn').click(function() {
-        if (confirm('Вы уверены, что хотите выйти?')) {
+    $(document).ready(function() {
+    if ($('#logout-btn').length) {
+        $('#logout-btn').on('click', function(e) {
+            e.preventDefault();
+            $('#logoutModal').css({
+                'display': 'flex'
+            }).fadeIn(200);
+        });
+    } else {
+        console.error('Logout button not found');
+    }
+
+    $('#confirmLogout').on('click', function() {
+        try {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             userRole = null;
-            $('#login-form').show();
-            $('#schedule-content').hide();
+
+            if ($('#login-form').length && $('#schedule-content').length) {
+                $('#login-form').show();
+                $('#schedule-content').hide();
+            }
+
+            $('#logoutModal').fadeOut(200, function() {
+                $(this).css('display', 'none');
+            });
+        } catch (error) {
+            console.error('Error during logout:', error);
         }
     });
+
+    $('#cancelLogout').on('click', function() {
+        $('#logoutModal').fadeOut(200, function() {
+            $(this).css('display', 'none');
+        });
+    });
+
+    $('#logoutModal').on('click', function(e) {
+        if ($(e.target).hasClass('modal')) {
+            $('#logoutModal').fadeOut(200, function() {
+                $(this).css('display', 'none');
+            });
+        }
+    });
+});
 }
