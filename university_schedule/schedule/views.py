@@ -2,12 +2,14 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import render
+from django.contrib.auth.models import User
 from .models import Faculty, Group, Schedule, Subject, Teacher, Classroom, User
 from .serializers import FacultySerializer, GroupSerializer, ScheduleSerializer, SubjectSerializer, TeacherSerializer, ClassroomSerializer
 import logging
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
@@ -28,6 +30,7 @@ class UserRoleView(APIView):
     def get(self, request):
         user = request.user
         role = user.role
+        logger.info(f"Fetching role for user: {user.username}")
         return Response({'role': role})
 
 class FacultyViewSet(viewsets.ModelViewSet):
@@ -39,6 +42,10 @@ class FacultyViewSet(viewsets.ModelViewSet):
         logger.info(f"Создание факультета: {request.data}")
         return super().create(request, *args, **kwargs)
 
+    def list(self, request, *args, **kwargs):
+        logger.info("Fetching all faculties")
+        return super().list(request, *args, **kwargs)
+
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
@@ -47,12 +54,22 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
-            return Group.objects.filter(faculty_id=faculty_id)
+            logger.info(f"Filtering groups by faculty_id={faculty_id}")
+            if faculty_id == 'undefined' or not faculty_id.isdigit():
+                logger.warning(f"Invalid faculty_id: {faculty_id}")
+                raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
+            return Group.objects.filter(faculty_id=int(faculty_id))
         return Group.objects.all()
 
     def create(self, request, *args, **kwargs):
         logger.info(f"Создание группы: {request.data}")
-        return super().create(request, *args, **kwargs)
+        try:
+            response = super().create(request, *args, **kwargs)
+            logger.info(f"Group created successfully: {response.data}")
+            return response
+        except Exception as e:
+            logger.error(f"Error creating group: {str(e)}")
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = Schedule.objects.all()
@@ -62,6 +79,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         group_id = self.request.query_params.get('group_id')
         if group_id:
+            logger.info(f"Filtering schedule by group_id={group_id}")
             return Schedule.objects.filter(group_id=group_id)
         return Schedule.objects.all()
 
@@ -69,8 +87,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         day = request.data.get('day_of_week')
         start_time = request.data.get('start_time')
         end_time = request.data.get('end_time')
-        teacher_id = request.data.get('teacher_id')
-        classroom_id = request.data.get('classroom_id')
+        teacher_id = request.data.get('teacher')
+        classroom_id = request.data.get('classroom')
 
         teacher_conflicts = Schedule.objects.filter(
             day_of_week=day,
@@ -106,8 +124,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
         day = request.data.get('day_of_week', instance.day_of_week)
         start_time = request.data.get('start_time', instance.start_time)
         end_time = request.data.get('end_time', instance.end_time)
-        teacher_id = request.data.get('teacher_id', instance.teacher_id)
-        classroom_id = request.data.get('classroom_id', instance.classroom_id)
+        teacher_id = request.data.get('teacher', instance.teacher_id)
+        classroom_id = request.data.get('classroom', instance.classroom_id)
 
         teacher_conflicts = Schedule.objects.filter(
             day_of_week=day,
@@ -148,7 +166,9 @@ class SubjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
+            logger.info(f"Filtering subjects by faculty_id={faculty_id}")
             if faculty_id == 'undefined' or not faculty_id.isdigit():
+                logger.warning(f"Invalid faculty_id: {faculty_id}")
                 raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
             return Subject.objects.filter(faculty_id=int(faculty_id))
         return Subject.objects.all()
@@ -161,7 +181,9 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
+            logger.info(f"Filtering teachers by faculty_id={faculty_id}")
             if faculty_id == 'undefined' or not faculty_id.isdigit():
+                logger.warning(f"Invalid faculty_id: {faculty_id}")
                 raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
             return Teacher.objects.filter(faculty_id=int(faculty_id))
         return Teacher.objects.all()
@@ -174,7 +196,9 @@ class ClassroomViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         faculty_id = self.request.query_params.get('faculty_id')
         if faculty_id:
+            logger.info(f"Filtering classrooms by faculty_id={faculty_id}")
             if faculty_id == 'undefined' or not faculty_id.isdigit():
+                logger.warning(f"Invalid faculty_id: {faculty_id}")
                 raise ValidationError({'faculty_id': 'Неверный идентификатор факультета'})
             return Classroom.objects.filter(faculty_id=int(faculty_id))
         return Classroom.objects.all()
@@ -182,26 +206,31 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_user_role(request):
+    logger.info(f"Fetching role for user: {request.user.username}")
     return Response({'role': request.user.role})
 
+logger = logging.getLogger(__name__)
+
 @api_view(['POST'])
-@csrf_exempt
 @permission_classes([AllowAny])
 def register_user(request):
     try:
-        username = request.data.get('username')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        email = request.data.get('email')
-        phone = request.data.get('phone')
-        password = request.data.get('password')
-        role = request.data.get('role')
+        data = request.data
+        username = data.get('username')
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        email = data.get('email')
+        phone = data.get('phone')
+        password = data.get('password')
+        role = data.get('role')
 
         logger.info(f"Registration attempt: username={username}, email={email}, role={role}")
 
-        if not all([username, first_name, last_name, email, password, role]):
-            logger.warning("Missing required fields")
-            return Response({'detail': 'Все поля обязательны'}, status=400)
+        required_fields = ['username', 'first_name', 'last_name', 'email', 'password', 'role']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            logger.warning(f"Missing fields: {missing_fields}")
+            return Response({'detail': f'Отсутствуют обязательные поля: {", ".join(missing_fields)}'}, status=400)
 
         if User.objects.filter(username=username).exists():
             logger.warning(f"Username {username} already exists")
@@ -214,6 +243,12 @@ def register_user(request):
             logger.warning(f"Invalid role: {role}")
             return Response({'detail': 'Недопустимая роль'}, status=400)
 
+        import re
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(email_regex, email):
+            logger.warning(f"Invalid email format: {email}")
+            return Response({'detail': 'Неверный формат email'}, status=400)
+
         logger.info("Creating user...")
         user = User.objects.create_user(
             username=username,
@@ -222,14 +257,14 @@ def register_user(request):
             first_name=first_name,
             last_name=last_name,
             phone=phone,
-            role=role
+            role=role,
+            is_active=True
         )
         logger.info(f"User created: {username}")
 
-        from rest_framework_simplejwt.tokens import RefreshToken
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
-        logger.info(f"Generated tokens for user {username}: access={access_token}, refresh={str(refresh)}")
+        logger.info(f"Generated tokens for user {username}")
 
         return Response({
             'detail': 'Регистрация успешна',
@@ -238,8 +273,8 @@ def register_user(request):
         }, status=201)
 
     except Exception as e:
-        logger.error(f"Registration error: {str(e)}", exc_info=True)
-        return Response({'detail': f'Ошибка на сервере: {str(e)}'}, status=500)
+        logger.error(f"Registration error: {str(e)}")
+        return Response({'detail': f'Ошибка регистрации: {str(e)}'}, status=400)
 
 def index(request):
     return render(request, 'schedule/schedule.html')

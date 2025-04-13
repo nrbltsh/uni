@@ -7,10 +7,12 @@ export function setupEntities(userRole, token, utils) {
             let tbody = $('#subjects-table tbody');
             tbody.empty();
             data.forEach(item => {
+                const facultyName = item.faculty ? item.faculty.name : 'Не указан';
+                const facultyId = item.faculty ? item.faculty.id : '';
                 tbody.append(`
                     <tr data-id="${item.id}">
                         <td>${item.name}</td>
-                        <td data-faculty-id="${item.faculty ? item.faculty.id : ''}">${item.faculty ? item.faculty.name : 'Не указан'}</td>
+                        <td data-faculty-id="${facultyId}">${facultyName}</td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-subject">Редактировать</button>
                             <button class="btn btn-danger btn-sm delete-subject">Удалить</button>
@@ -24,6 +26,7 @@ export function setupEntities(userRole, token, utils) {
             });
         }).fail(function(xhr) {
             console.error('Ошибка загрузки предметов:', xhr.responseJSON);
+            alert('Ошибка загрузки предметов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 
@@ -32,12 +35,14 @@ export function setupEntities(userRole, token, utils) {
             let tbody = $('#teachers-table tbody');
             tbody.empty();
             data.forEach(item => {
+                const facultyName = item.faculty ? item.faculty.name : 'Не указан';
+                const facultyId = item.faculty ? item.faculty.id : '';
                 tbody.append(`
                     <tr data-id="${item.id}">
                         <td>${item.last_name || 'Не указано'}</td>
                         <td>${item.first_name || 'Не указано'}</td>
                         <td>${item.middle_name || 'Не указано'}</td>
-                        <td data-faculty-id="${item.faculty ? item.faculty.id : ''}">${item.faculty ? item.faculty.name : 'Не указан'}</td>
+                        <td data-faculty-id="${facultyId}">${facultyName}</td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-teacher">Редактировать</button>
                             <button class="btn btn-danger btn-sm delete-teacher">Удалить</button>
@@ -51,6 +56,7 @@ export function setupEntities(userRole, token, utils) {
             });
         }).fail(function(xhr) {
             console.error('Ошибка загрузки преподавателей:', xhr.responseJSON);
+            alert('Ошибка загрузки преподавателей: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 
@@ -59,10 +65,12 @@ export function setupEntities(userRole, token, utils) {
             let tbody = $('#classrooms-table tbody');
             tbody.empty();
             data.forEach(item => {
+                const facultyName = item.faculty ? item.faculty.name : 'Не указан';
+                const facultyId = item.faculty ? item.faculty.id : '';
                 tbody.append(`
                     <tr data-id="${item.id}">
                         <td>${item.name}</td>
-                        <td data-faculty-id="${item.faculty ? item.faculty.id : ''}">${item.faculty ? item.faculty.name : 'Не указан'}</td>
+                        <td data-faculty-id="${facultyId}">${facultyName}</td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-classroom">Редактировать</button>
                             <button class="btn btn-danger btn-sm delete-classroom">Удалить</button>
@@ -76,6 +84,7 @@ export function setupEntities(userRole, token, utils) {
             });
         }).fail(function(xhr) {
             console.error('Ошибка загрузки аудиторий:', xhr.responseJSON);
+            alert('Ошибка загрузки аудиторий: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 
@@ -100,6 +109,7 @@ export function setupEntities(userRole, token, utils) {
             });
         }).fail(function(xhr) {
             console.error('Ошибка загрузки факультетов:', xhr.responseJSON);
+            alert('Ошибка загрузки факультетов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 
@@ -108,10 +118,12 @@ export function setupEntities(userRole, token, utils) {
             let tbody = $('#groups-table tbody');
             tbody.empty();
             data.forEach(item => {
+                const facultyName = item.faculty ? item.faculty.name : 'Не указан';
+                const facultyId = item.faculty ? item.faculty.id : '';
                 tbody.append(`
                     <tr data-id="${item.id}">
                         <td>${item.name}</td>
-                        <td data-faculty-id="${item.faculty ? item.faculty.id : ''}">${item.faculty ? item.faculty.name : 'Не указан'}</td>
+                        <td data-faculty-id="${facultyId}">${facultyName}</td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-group">Редактировать</button>
                             <button class="btn btn-danger btn-sm delete-group">Удалить</button>
@@ -125,6 +137,7 @@ export function setupEntities(userRole, token, utils) {
             });
         }).fail(function(xhr) {
             console.error('Ошибка загрузки групп:', xhr.responseJSON);
+            alert('Ошибка загрузки групп: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 
@@ -205,7 +218,7 @@ export function setupEntities(userRole, token, utils) {
         }
         const data = {
             name: name,
-            faculty_id: parseInt(faculty_id)
+            faculty: parseInt(faculty_id)
         };
         console.log('Добавление предмета:', data);
         $.ajax({
@@ -222,7 +235,7 @@ export function setupEntities(userRole, token, utils) {
                 }, 500);
             },
             error: function(xhr) {
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
+                alert('Ошибка добавления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
             }
         });
     });
@@ -269,7 +282,7 @@ export function setupEntities(userRole, token, utils) {
             method: 'PUT',
             data: JSON.stringify({
                 name: newName,
-                faculty_id: parseInt(faculty_id)
+                faculty: parseInt(faculty_id)
             }),
             contentType: 'application/json',
             success: function() {
@@ -280,7 +293,7 @@ export function setupEntities(userRole, token, utils) {
                 }, 500);
             },
             error: function(xhr) {
-                alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
+                alert('Ошибка обновления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
             }
         });
     });
@@ -303,7 +316,7 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка удаления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка удаления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
@@ -324,7 +337,7 @@ export function setupEntities(userRole, token, utils) {
             last_name: last_name,
             first_name: first_name,
             middle_name: middle_name,
-            faculty_id: parseInt(faculty_id)
+            faculty: parseInt(faculty_id)
         };
         console.log('Добавление преподавателя:', data);
         $.ajax({
@@ -341,7 +354,7 @@ export function setupEntities(userRole, token, utils) {
                 }, 500);
             },
             error: function(xhr) {
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
+                alert('Ошибка добавления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
             }
         });
     });
@@ -359,7 +372,10 @@ export function setupEntities(userRole, token, utils) {
         $('#edit-teacher-middle-name').val(middleName);
         $('#edit-teacher-faculty').empty().append('<option value="">Выберите факультет</option>');
         $.get('/api/faculties/', function(data) {
-            $('#edit-teacher-faculty').append(data.map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+            $('#edit-teacher-faculty').append(data.map(f => `<option value="${f.id}" ${ facultyId && f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+        }).fail(function(xhr) {
+            console.error('Ошибка загрузки факультетов:', xhr.responseJSON);
+            alert('Ошибка загрузки факультетов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
         $('#edit-teacher-modal').modal('show');
     });
@@ -377,7 +393,7 @@ export function setupEntities(userRole, token, utils) {
             last_name: last_name,
             first_name: first_name,
             middle_name: middle_name,
-            faculty_id: parseInt(faculty_id)
+            faculty: parseInt(faculty_id)
         };
         const id = $('#edit-teacher-id').val();
         console.log('Обновление преподавателя:', data);
@@ -395,7 +411,7 @@ export function setupEntities(userRole, token, utils) {
                 }, 500);
             },
             error: function(xhr) {
-                alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
+                alert('Ошибка обновления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
             }
         });
     });
@@ -414,7 +430,7 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка удаления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка удаления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
@@ -422,36 +438,38 @@ export function setupEntities(userRole, token, utils) {
 
     // Работа с аудиториями
     $('#add-classroom-form').submit(function(event) {
-        event.preventDefault();
-        const name = $('#classroom-name').val();
-        const faculty_id = $('#classroom-faculty').val();
-        if (!name || !faculty_id) {
-            alert('Пожалуйста, заполните все поля аудитории, включая выбор факультета.');
-            return;
+    event.preventDefault();
+    const name = $('#classroom-name').val();
+    const facultyId = $('#classroom-faculty').val();
+    if (!name || !facultyId) {
+        alert('Пожалуйста, заполните все поля для аудитории.');
+        return;
+    }
+    const data = {
+        name: name,
+        faculty: parseInt(facultyId)
+    };
+    console.log('Добавление аудитории:', data);
+    $.ajax({
+        url: '/api/classrooms/',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+        success: function(response) {
+            console.log('Аудитория добавлена:', response);
+            alert('Аудитория добавлена!');
+            loadClassrooms();
+            loadClassroomsTable();
+            $('#add-classroom-form')[0].reset();
+        },
+        error: function(xhr) {
+            console.error('Ошибка добавления аудитории:', xhr.responseJSON);
+            alert('Ошибка добавления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
+
         }
-        const data = {
-            name: name,
-            faculty_id: parseInt(faculty_id)
-        };
-        console.log('Добавление аудитории:', data);
-        $.ajax({
-            url: '/api/classrooms/',
-            method: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function() {
-                alert('Аудитория добавлена!');
-                setTimeout(function() {
-                    loadClassrooms();
-                    loadClassroomsTable();
-                    $('#add-classroom-form')[0].reset();
-                }, 500);
-            },
-            error: function(xhr) {
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
-            }
-        });
     });
+});
 
     $(document).on('click', '.edit-classroom', function() {
         const row = $(this).closest('tr');
@@ -462,42 +480,45 @@ export function setupEntities(userRole, token, utils) {
         $('#edit-classroom-name').val(name);
         $('#edit-classroom-faculty').empty().append('<option value="">Выберите факультет</option>');
         $.get('/api/faculties/', function(data) {
-            $('#edit-classroom-faculty').append(data.map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+            $('#edit-classroom-faculty').append(data.map(f => `<option value="${f.id}" ${ facultyId && f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+        }).fail(function(xhr) {
+            console.error('Ошибка загрузки факультетов:', xhr.responseJSON);
+            alert('Ошибка загрузки факультетов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
         $('#edit-classroom-modal').modal('show');
     });
 
     $('#save-edit-classroom').click(function() {
-        const name = $('#edit-classroom-name').val();
-        const faculty_id = $('#edit-classroom-faculty').val();
-        if (!name || !faculty_id) {
-            alert('Пожалуйста, заполните все поля аудитории.');
-            return;
+    const name = $('#edit-classroom-name').val();
+    const facultyId = $('#edit-classroom-faculty').val();
+    if (!name || !facultyId) {
+        alert('Пожалуйста, заполните все поля для аудитории.');
+        return;
+    }
+    const data = {
+        name: name,
+        faculty: parseInt(facultyId)
+    };
+    const id = $('#edit-classroom-id').val();
+    console.log('Обновление аудитории:', data);
+    $.ajax({
+        url: `/api/classrooms/${id}/`,
+        method: 'PUT',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+        success: function() {
+            alert('Аудитория обновлена!');
+            loadClassrooms();
+            loadClassroomsTable();
+            $('#edit-classroom-modal').modal('hide');
+        },
+        error: function(xhr) {
+            alert('Ошибка обновления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
         }
-        const data = {
-            name: name,
-            faculty_id: parseInt(faculty_id)
-        };
-        const id = $('#edit-classroom-id').val();
-        console.log('Обновление аудитории:', data);
-        $.ajax({
-            url: `/api/classrooms/${id}/`,
-            method: 'PUT',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function() {
-                alert('Аудитория обновлена!');
-                setTimeout(function() {
-                    loadClassrooms();
-                    loadClassroomsTable();
-                    $('#edit-classroom-modal').modal('hide');
-                }, 500);
-            },
-            error: function(xhr) {
-                alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
-            }
-        });
+
     });
+});
 
     $(document).on('click', '.delete-classroom', function() {
         if (confirm('Вы уверены, что хотите удалить эту аудиторию?')) {
@@ -513,7 +534,7 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка удаления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка удаления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
@@ -545,7 +566,7 @@ export function setupEntities(userRole, token, utils) {
                 }, 500);
             },
             error: function(xhr) {
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
+                alert('Ошибка добавления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
             }
         });
     });
@@ -571,7 +592,7 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка обновления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
@@ -593,51 +614,45 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка удаления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка удаления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
     });
 
     // Работа с группами
-    $('#add-group-form').submit(function(event) {
-        event.preventDefault();
-        const name = $('#group-name').val();
-        const faculty_id = $('#group-faculty').val();
-        if (!name || !faculty_id || faculty_id === "") {
-            alert('Пожалуйста, заполните все поля для группы, включая выбор факультета.');
-            return;
+   $('#add-group-form').submit(function(event) {
+    event.preventDefault();
+    const name = $('#group-name').val();
+    const facultyId = $('#group-faculty').val();
+    if (!name || !facultyId) {
+        alert('Пожалуйста, заполните все поля для группы.');
+        return;
+    }
+    const data = {
+        name: name,
+        faculty: parseInt(facultyId) // Изменено с faculty_id на faculty
+    };
+         console.log('Добавление группы:', data);
+    $.ajax({
+        url: '/api/groups/',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+        success: function(response) {
+            console.log('Группа успешно добавлена:', response);
+            alert('Группа добавлена!');
+            loadGroups();
+            loadGroupsTable();
+            $('#add-group-form')[0].reset();
+        },
+        error: function(xhr) {
+            console.error('Ошибка добавления группы:', xhr.responseJSON);
+            alert('Ошибка добавления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
         }
-        const data = {
-            name: name,
-            faculty_id: parseInt(faculty_id)
-        };
-        console.log('Добавление группы:', data);
-        $.ajax({
-            url: '/api/groups/',
-            method: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function(response) {
-                console.log('Группа успешно добавлена:', response);
-                alert('Группа добавлена!');
-                setTimeout(function() {
-                    loadGroups();
-                    loadGroupsTable();
-                    $('#add-group-form')[0].reset();
-                }, 500);
-            },
-            error: function(xhr) {
-                console.log('Ошибка добавления группы:', xhr.responseJSON);
-                alert('Ошибка добавления: ' + JSON.stringify(xhr.responseJSON));
-                if (xhr.status === 401) {
-                    refreshToken(function() {
-                        $.ajax(this);
-                    });
-                }
-            }
-        });
     });
+});
 
     $(document).on('click', '.edit-group', function() {
         const row = $(this).closest('tr');
@@ -648,42 +663,44 @@ export function setupEntities(userRole, token, utils) {
         $('#edit-group-name').val(name);
         $('#edit-group-faculty').empty().append('<option value="">Выберите факультет</option>');
         $.get('/api/faculties/', function(data) {
-            $('#edit-group-faculty').append(data.map(f => `<option value="${f.id}" ${f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+            $('#edit-group-faculty').append(data.map(f => `<option value="${f.id}" ${ facultyId && f.id == facultyId ? 'selected' : ''}>${f.name}</option>`));
+        }).fail(function(xhr) {
+            console.error('Ошибка загрузки факультетов:', xhr.responseJSON);
+            alert('Ошибка загрузки факультетов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
         $('#edit-group-modal').modal('show');
     });
 
     $('#save-edit-group').click(function() {
-        const name = $('#edit-group-name').val();
-        const faculty_id = $('#edit-group-faculty').val();
-        if (!name || !faculty_id) {
-            alert('Пожалуйста, заполните все поля для группы.');
-            return;
+    const name = $('#edit-group-name').val();
+    const facultyId = $('#edit-group-faculty').val();
+    if (!name || !facultyId) {
+        alert('Пожалуйста, заполните все поля для группы.');
+        return;
+    }
+    const data = {
+        name: name,
+        faculty: parseInt(facultyId) // Изменено с faculty_id на faculty
+    };
+    const id = $('#edit-group-id').val();
+    console.log('Обновление группы:', data);
+    $.ajax({
+        url: `/api/groups/${id}/`,
+        method: 'PUT',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') },
+        success: function() {
+            alert('Группа обновлена!');
+            loadGroups();
+            loadGroupsTable();
+            $('#edit-group-modal').modal('hide');
+        },
+        error: function(xhr) {
+            alert('Ошибка обновления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
         }
-        const data = {
-            name: name,
-            faculty_id: parseInt(faculty_id)
-        };
-        const id = $('#edit-group-id').val();
-        console.log('Обновление группы:', data);
-        $.ajax({
-            url: `/api/groups/${id}/`,
-            method: 'PUT',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function() {
-                alert('Группа обновлена!');
-                setTimeout(function() {
-                    loadGroups();
-                    loadGroupsTable();
-                    $('#edit-group-modal').modal('hide');
-                }, 500);
-            },
-            error: function(xhr) {
-                alert('Ошибка обновления: ' + JSON.stringify(xhr.responseJSON));
-            }
-        });
     });
+});
 
     $(document).on('click', '.delete-group', function() {
         if (confirm('Вы уверены, что хотите удалить эту группу?')) {
@@ -699,7 +716,7 @@ export function setupEntities(userRole, token, utils) {
                     }, 500);
                 },
                 error: function(xhr) {
-                    alert('Ошибка удаления: ' + JSON.stringify(xhr.responseJSON));
+                    alert('Ошибка удаления: ' + (xhr.responseJSON?.detail || JSON.stringify(xhr.responseJSON)));
                 }
             });
         }
@@ -708,10 +725,16 @@ export function setupEntities(userRole, token, utils) {
     // Вспомогательная функция для загрузки факультетов в select
     function loadFacultiesIntoSelect(selectId) {
         $.get('/api/faculties/', function(data) {
-            $(selectId).empty().append('<option value="">Выберите факультет</option>')
-                .append(data.map(f => `<option value="${f.id}">${f.name}</option>`));
+            const $select = $(selectId);
+            $select.empty().append('<option value="">Выберите факультет</option>');
+            if (data && data.length > 0) {
+                $select.append(data.map(f => `<option value="${f.id}">${f.name}</option>`));
+            } else {
+                $select.append('<option value="">Факультеты отсутствуют</option>');
+            }
         }).fail(function(xhr) {
             console.error('Ошибка загрузки факультетов:', xhr.responseJSON);
+            alert('Ошибка загрузки факультетов: ' + (xhr.responseJSON?.detail || 'Неизвестная ошибка'));
         });
     }
 }
