@@ -7,7 +7,7 @@ class User(AbstractUser):
         ('teacher', 'Преподаватель'),
         ('manager', 'Менеджер'),
     )
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='manager')
     phone = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
